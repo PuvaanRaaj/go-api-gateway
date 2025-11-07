@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  gateway:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - BACKEND_A=http://service-a:8081
+      - BACKEND_B=http://service-b:8082
+
+  service-a:
+    build: ./mock/service-a
+    ports:
+      - "8081:8081"
+
+  service-b:
+    build: ./mock/service-b
+    ports:
+      - "8082:8082"
