@@ -5,5 +5,5 @@ COPY . .
 
 RUN go build -o service-b
 
-EXPOSE 8082
+EXPOSE 8080
 CMD ["./service-b"]

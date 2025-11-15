@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 	"strconv"
 )
@@ -12,18 +13,29 @@ type Config struct {
 }
 
 func Load() *Config {
-	port, _ := strconv.Atoi(getEnv("PORT", "8080"))
+	port := parsePort(firstEnv([]string{"GATEWAY_PORT", "PORT"}, "8080"))
 
 	return &Config{
 		Port:     port,
-		BackendA: getEnv("BACKEND_A", "http://localhost:8081"),
-		BackendB: getEnv("BACKEND_B", "http://localhost:8082"),
+		BackendA: firstEnv([]string{"BACKEND_A_URL", "BACKEND_A"}, "http://service-a:8080"),
+		BackendB: firstEnv([]string{"BACKEND_B_URL", "BACKEND_B"}, "http://service-b:8080"),
 	}
 }
 
-func getEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
+func firstEnv(keys []string, fallback string) string {
+	for _, key := range keys {
+		if value, ok := os.LookupEnv(key); ok && value != "" {
+			return value
+		}
 	}
 	return fallback
+}
+
+func parsePort(raw string) int {
+	port, err := strconv.Atoi(raw)
+	if err != nil {
+		log.Printf("invalid port %q, defaulting to 8080: %v", raw, err)
+		return 8080
+	}
+	return port
 }

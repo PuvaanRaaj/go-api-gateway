@@ -1,8 +1,5 @@
 # Go API Gateway – Phase 1
 
-A minimal, production‑friendly starting point for an API Gateway in Go with:
-
-* Clean project structure
 * Basic reverse proxy (path‑based routing)
 * Request/response logging with request IDs
 * Dockerfile + Docker Compose
@@ -14,7 +11,23 @@ A minimal, production‑friendly starting point for an API Gateway in Go with:
 > * `http://localhost:8080/a/...` → Service A
 > * `http://localhost:8080/b/...` → Service B
 
----
+```
+
+
+           +-----------------------------+
+           |     Go API Gateway          |
+           |        (Docker)             |
+           +--------------+--------------+
+                          |
+        -----------------------------------------
+        |                                       |
++---------------+                     +----------------+
+|   Service A   |                     |   Service B    |
+|   (Docker)    |                     |   (Docker)     |
++---------------+                     +----------------+
+
+```
+
 
 ## 📁 Project Structure
 

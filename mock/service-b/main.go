@@ -4,21 +4,41 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 )
 
+type resp struct {
+	Service    string `json:"service"`
+	Message    string `json:"message"`
+	RequestID  string `json:"request_id"`
+	RequestURI string `json:"request_uri"`
+}
+
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		response := map[string]string{
-			"service": "B",
-			"path":    r.URL.Path,
-		}
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", handle)
 
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
-	})
+	addr := ":" + getPort()
+	log.Printf("service-b listening on %s", addr)
+	log.Fatal(http.ListenAndServe(addr, mux))
+}
 
-	log.Printf("starting service B on :8082")
-	if err := http.ListenAndServe(":8082", nil); err != nil {
-		log.Fatal(err)
+func handle(w http.ResponseWriter, r *http.Request) {
+	log.Printf("service-b received %s %s rid=%s", r.Method, r.URL.Path, r.Header.Get("X-Request-ID"))
+	out := resp{
+		Service:    "service-b",
+		Message:    "hello from service B",
+		RequestID:  r.Header.Get("X-Request-ID"),
+		RequestURI: r.RequestURI,
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(out)
+}
+
+func getPort() string {
+	if p := os.Getenv("PORT"); p != "" {
+		return p
+	}
+	return "8080"
 }

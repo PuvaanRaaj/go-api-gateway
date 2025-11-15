@@ -1,20 +1,21 @@
-version: '3'
-
 services:
   gateway:
     build: .
+    image: api-gateway:dev
+    environment:
+      - GATEWAY_PORT=8080
+      - BACKEND_A_URL=http://service-a:8080
+      - BACKEND_B_URL=http://service-b:8080
     ports:
       - "8080:8080"
-    environment:
-      - BACKEND_A=http://service-a:8081
-      - BACKEND_B=http://service-b:8082
+    depends_on:
+      - service-a
+      - service-b
 
   service-a:
     build: ./mock/service-a
-    ports:
-      - "8081:8081"
+    image: mock-service-a:dev
 
   service-b:
     build: ./mock/service-b
-    ports:
-      - "8082:8082"
+    image: mock-service-b:dev
