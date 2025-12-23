@@ -1,4 +1,16 @@
 services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gateway
+      POSTGRES_PASSWORD: gateway
+      POSTGRES_DB: gateway
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   gateway:
     build: .
     image: api-gateway:dev
@@ -6,11 +18,16 @@ services:
       - GATEWAY_PORT=8080
       - BACKEND_A_URL=http://service-a:8080
       - BACKEND_B_URL=http://service-b:8080
+      - DATABASE_URL=postgres://gateway:gateway@db:5432/gateway?sslmode=disable
+      - JWT_SECRET=dev-secret
+      - API_KEY_HEADER=X-API-Key
+      - TOKEN_TTL=1h
     ports:
       - "8080:8080"
     depends_on:
       - service-a
       - service-b
+      - db
 
   service-a:
     build: ./mock/service-a
@@ -19,3 +36,6 @@ services:
   service-b:
     build: ./mock/service-b
     image: mock-service-b:dev
+
+volumes:
+  pgdata:
